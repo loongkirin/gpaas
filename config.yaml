@@ -1,0 +1,20 @@
+dbconfig:
+  db_type: 'postgres'
+  host: '172.17.0.2:5432'
+  dbname: 'gpaas_db'
+  username: 'gormuser'
+  password: 'gormuser'
+  max_idle_connections: 10
+  max_open_connections: 100
+  conn_max_lifetime: '10m'
+
+jwtconfig: 
+  scret_key: 'loongkirin'
+  expires_time: 60   
+  buffer_time: 60
+  issuer: 'github.com/loongkirin'
+
+redisconfig:
+  db: 0
+  host: '172.17.0.4:6379'
+  password: ''  
