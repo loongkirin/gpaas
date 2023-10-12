@@ -1,9 +1,11 @@
 dbconfig:
   db_type: 'postgres'
-  host: '172.17.0.2:5432'
-  dbname: 'gpaas_db'
-  username: 'gormuser'
-  password: 'gormuser'
+  host: '127.0.0.1'
+  port: '5432'
+  config: 'sslmode=disable TimeZone=Asia/Shanghai'
+  db_name: 'gpaas_db'
+  user: 'gpaas'
+  password: 'pg@password'
   max_idle_connections: 10
   max_open_connections: 100
   conn_max_lifetime: '10m'
@@ -16,5 +18,5 @@ jwtconfig:
 
 redisconfig:
   db: 0
-  host: '172.17.0.4:6379'
+  host: '127.0.0.1:6379'
   password: ''  

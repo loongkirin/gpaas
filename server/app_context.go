@@ -6,6 +6,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	core "github.com/loongkirin/gpaas/core"
+	postgres "github.com/loongkirin/gpaas/domain/infrastructure/postgres"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 )
@@ -69,4 +70,15 @@ func (ctx *appContext) initRedis() {
 }
 
 func (ctx *appContext) initDbContext() {
+	ctx.APP_DbContext = createDbContext(ctx.APP_CONFIG.DbConfig)
+}
+
+func createDbContext(cfg core.DbConfig) core.DbContext {
+	var dbcontext core.DbContext
+	if cfg.DbType == "postgres" {
+		postgresDbCtx := postgres.NewDbContext(&cfg)
+		dbcontext = &postgresDbCtx
+	}
+
+	return dbcontext
 }
