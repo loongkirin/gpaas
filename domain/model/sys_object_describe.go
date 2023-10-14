@@ -10,6 +10,7 @@ type ObjectDescribe struct {
 	Description    string `json:"mobile" gorm:"size:1000"`
 	StoreTableName string `json:"store_table_name" gorm:"size:100;not null"`
 	DefineType     string `json:"defint_type" gorm:"size:100"`
+	IsActive       bool   `json:"is_active"`
 }
 
 func (entity *ObjectDescribe) TableName() string {
