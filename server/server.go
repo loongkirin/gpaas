@@ -7,30 +7,21 @@ import (
 	"github.com/gin-gonic/gin"
 	// migrator "github.com/loongkirin/gpaas/domain/migrator"
 
-	repo "github.com/loongkirin/gpaas/domain/repository"
-	repoImpl "github.com/loongkirin/gpaas/domain/repository/implement"
+	router "github.com/loongkirin/gpaas/api/router"
+	app "github.com/loongkirin/gpaas/app"
 )
 
 func Run() {
 	fmt.Println("gpaas server start......")
-	InitAppContext()
+	app.InitAppContext()
 
 	// fmt.Println(AppContext.APP_DbContext.GetDb() == nil)
 	// fmt.Println(AppContext.APP_REDIS == nil)
 
-	// router := initializeRouter()
-	// router.Run(":8081")
-
 	// migrator.MigrateDb(AppContext.APP_DbContext)
 
-	var userRepo repo.UserRepository
-	userRepo = repoImpl.NewUserRepository(AppContext.APP_DbContext)
-	user, err := userRepo.FindById("1")
-	if err != nil {
-		fmt.Printf(err.Message)
-	} else {
-		fmt.Printf(user.Id)
-	}
+	router := initializeRouter()
+	router.Run(":8081")
 }
 
 // 初始化gin总路由
@@ -44,6 +35,9 @@ func initializeRouter() *gin.Engine {
 			c.JSON(http.StatusOK, "ok")
 		})
 	}
+	v1Group := Router.Group("v1")
+	ginRouterEntry := router.Entry{}
+	ginRouterEntry.InitAllRouter(v1Group)
 
 	return Router
 }
