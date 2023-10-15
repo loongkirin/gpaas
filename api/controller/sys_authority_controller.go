@@ -14,9 +14,9 @@ import (
 	"github.com/mojocn/base64Captcha"
 )
 
-var store = base64Captcha.DefaultMemStore
+// var store = base64Captcha.DefaultMemStore
 
-// var store = util.NewDefaultCaptchaRedisStore()
+var store = util.NewDefaultCaptchaRedisStore()
 
 type SystemAuthorityController struct {
 	userService service.UserService
@@ -72,7 +72,7 @@ func (t *SystemAuthorityController) Login(c *gin.Context) {
 func (t *SystemAuthorityController) TokenNext(c *gin.Context, r *dto.LoginResponse) {
 	j := util.NewJWTUtil() // 唯一签名
 	claims := j.CreateClaims(r.Mobile, r.UserName)
-	token, err := j.GernerateToken(claims)
+	token, err := j.GenerateToken(claims)
 	if err != nil {
 		response.Fail(c, "获取token失败", map[string]interface{}{})
 		return

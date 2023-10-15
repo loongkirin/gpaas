@@ -9,19 +9,23 @@ import (
 	postgres "github.com/loongkirin/gpaas/domain/infrastructure/postgres"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
+	"golang.org/x/sync/singleflight"
 )
 
 type appContext struct {
-	APP_CONFIG    core.AppConfig
-	APP_VP        *viper.Viper
-	APP_REDIS     *redis.Client
-	APP_DbContext core.DbContext
+	APP_CONFIG                 core.AppConfig
+	APP_VP                     *viper.Viper
+	APP_REDIS                  *redis.Client
+	APP_DbContext              core.DbContext
+	APP_Concurrency_Controller *singleflight.Group
 }
 
 var AppContext appContext
 
 func InitAppContext() {
-	AppContext = appContext{}
+	AppContext = appContext{
+		APP_Concurrency_Controller: &singleflight.Group{},
+	}
 	AppContext.initViper()
 	AppContext.initRedis()
 	AppContext.initDbContext()
