@@ -59,6 +59,19 @@ func (jwtUtil *JWTUtil) GenerateToken(claims apiCommon.JWTClaims) (string, error
 
 func (jwtUtil *JWTUtil) Refresh(oldToken string, claims apiCommon.JWTClaims) (string, error) {
 	v, err, _ := app.AppContext.APP_Concurrency_Controller.Do("JWT:"+oldToken, func() (interface{}, error) {
+		c, perr := jwtUtil.ParseWithClaims(oldToken) 
+		if c == nil {
+			return nil, perr
+		}
+		issuedAt, _ := c.RegisteredClaims.GetExpirationTime()
+		expiredAt := time.Now()
+		if issuedAt != nil {
+			expiredAt = time.Unix(issuedAt.Unix()+c.BufferTime, 0).UTC()
+		}
+
+		if time.Now().After(expiredAt)) {
+			return nil, TokenExpired
+		}
 		return jwtUtil.GenerateToken(claims)
 	})
 	return v.(string), err
@@ -85,7 +98,6 @@ func (jwtUtil *JWTUtil) ParseToken(tokenString string) (*apiCommon.JWTClaims, er
 			return claims, nil
 		}
 		return nil, TokenInvalid
-
 	} else {
 		return nil, TokenInvalid
 	}

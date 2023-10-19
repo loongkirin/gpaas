@@ -13,8 +13,9 @@ type Response struct {
 }
 
 const (
-	ERROR   = 500
-	SUCCESS = 200
+	ERROR        = 500
+	UNAUTHORIZED = 401
+	SUCCESS      = 200
 )
 
 func Result(c *gin.Context, code int, msg string, data interface{}) {
@@ -31,4 +32,8 @@ func Ok(c *gin.Context, msg string, data interface{}) {
 
 func Fail(c *gin.Context, msg string, data interface{}) {
 	Result(c, ERROR, msg, data)
+}
+
+func Unauthorized(c *gin.Context, msg string, data interface{}) {
+	Result(c, UNAUTHORIZED, msg, data)
 }
