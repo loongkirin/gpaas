@@ -39,11 +39,10 @@ func (s *UserServiceImpl) Login(u *dto.LoginRequest) (r *dto.LoginResponse, err 
 	}
 
 	r = &dto.LoginResponse{
-		Mobile:       user.Mobile,
-		UserId:       user.DbBaseModel.Id,
-		UserName:     user.Name,
-		AccessToken:  "",
-		RefreshToken: "",
+		Mobile:      user.Mobile,
+		UserId:      user.DbBaseModel.Id,
+		UserName:    user.Name,
+		AccessToken: "",
 	}
 
 	return r, nil

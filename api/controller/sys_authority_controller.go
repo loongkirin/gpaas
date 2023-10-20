@@ -93,3 +93,19 @@ func (t *SystemAuthorityController) Register(c *gin.Context) {
 		response.Ok(c, "注册成功", map[string]interface{}{})
 	}
 }
+
+func (t *SystemAuthorityController) RefreshToken(c *gin.Context) {
+	var l dto.RefreshToken
+	_ = c.ShouldBindJSON(&l)
+
+	j := util.NewJWTUtil() // 唯一签名
+	token, err := j.RefreshToken(l.AccessToken)
+	if err != nil {
+		response.Unauthorized(c, err.Error(), map[string]interface{}{})
+		return
+	}
+	r := &dto.RefreshToken{
+		AccessToken: token,
+	}
+	response.Ok(c, "Refresh token success", r)
+}

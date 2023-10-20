@@ -13,6 +13,7 @@ func (s *SystemAuthorityRouter) InitSystemAuthorityRouter(router *gin.RouterGrou
 	authRouter.GET("captcha", authApi.Captcha)
 	authRouter.POST("login", authApi.Login)
 	authRouter.POST("register", authApi.Register)
+	authRouter.POST("refresh_token", authApi.RefreshToken)
 
 	return authRouter
 }
