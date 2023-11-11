@@ -2,10 +2,10 @@ package implement
 
 import (
 	"errors"
-	"fmt"
 
 	core "github.com/loongkirin/gpaas/core"
 	model "github.com/loongkirin/gpaas/domain/model"
+	repo "github.com/loongkirin/gpaas/domain/repository"
 	util "github.com/loongkirin/gpaas/util"
 	"gorm.io/gorm"
 )
@@ -14,13 +14,13 @@ type UserRepositoryImpl struct {
 	BaseRepository
 }
 
-func NewUserRepository(dbContext core.DbContext) *UserRepositoryImpl {
-	userRepo := UserRepositoryImpl{
+func NewUserRepository(dbContext core.DbContext) repo.UserRepository {
+	userRepo := &UserRepositoryImpl{
 		BaseRepository: BaseRepository{
 			dbContext: dbContext,
 		},
 	}
-	return &userRepo
+	return userRepo
 }
 
 func (r *UserRepositoryImpl) FindById(id string) (*model.User, *core.AppError) {
@@ -57,16 +57,13 @@ func (r *UserRepositoryImpl) FindByMobile(mobile string) (*model.User, *core.App
 
 func (r *UserRepositoryImpl) InsertUser(u *model.User) (*model.User, *core.AppError) {
 	db, appErr := r.getDb()
-	if appErr == nil {
+	if appErr != nil {
 		return nil, appErr
 	}
 	var user model.User
 	err := db.Where("mobile = ?", u.Mobile).First(&user).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		u.Password = util.BcryptHash(u.Password)
-		uid := util.GenerateId()
-		fmt.Println(uid)
-		u.DbBaseModel.Id = uid
 		err = db.Create(u).Error
 		if err != nil {
 			return nil, core.AsAppError(err)

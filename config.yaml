@@ -10,13 +10,12 @@ dbconfig:
   max_open_connections: 100
   conn_max_lifetime: '10m'
 
-jwtconfig: 
-  scret_key: 'loongkirin'
-  expires_time: 60   
-  buffer_time: 60
+oauthconfig: 
+  secret_key: 'loongkirin_gpaas_auth_secret_key'
+  expires_time: 60
   issuer: 'github.com/loongkirin'
 
 redisconfig:
   db: 0
   host: '127.0.0.1:6379'
-  password: ''  
+  password: ''

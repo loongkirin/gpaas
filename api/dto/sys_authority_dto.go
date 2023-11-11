@@ -14,10 +14,11 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Mobile      string `json:"mobile"`
-	UserId      string `json:"user_id"`
-	UserName    string `json:"user_name"`
-	AccessToken string `json:"access_token"`
+	Mobile       string `json:"mobile"`
+	UserId       string `json:"user_id"`
+	UserName     string `json:"user_name"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type RegisterRequest struct {

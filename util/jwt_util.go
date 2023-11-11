@@ -26,10 +26,10 @@ var (
 
 func NewJWTUtil() *JWTUtil {
 	return &JWTUtil{
-		SecretKey:   []byte(app.AppContext.APP_CONFIG.JWTConfig.SecretKey),
-		ExpiresTime: app.AppContext.APP_CONFIG.JWTConfig.ExpiresTime,
-		BufferTime:  app.AppContext.APP_CONFIG.JWTConfig.BufferTime,
-		Issuer:      app.AppContext.APP_CONFIG.JWTConfig.Issuer,
+		SecretKey:   []byte(app.AppContext.APP_CONFIG.OAuthConfig.SecretKey),
+		ExpiresTime: app.AppContext.APP_CONFIG.OAuthConfig.ExpiresTime,
+		BufferTime:  60,
+		Issuer:      app.AppContext.APP_CONFIG.OAuthConfig.Issuer,
 	}
 }
 

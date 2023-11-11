@@ -7,6 +7,7 @@ import (
 	core "github.com/loongkirin/gpaas/core"
 	model "github.com/loongkirin/gpaas/domain/model"
 	repo "github.com/loongkirin/gpaas/domain/repository"
+	svc "github.com/loongkirin/gpaas/service"
 	util "github.com/loongkirin/gpaas/util"
 )
 
@@ -14,7 +15,7 @@ type UserServiceImpl struct {
 	userRepo repo.UserRepository
 }
 
-func NewUserService(userRepo repo.UserRepository) *UserServiceImpl {
+func NewUserService(userRepo repo.UserRepository) svc.UserService {
 	return &UserServiceImpl{
 		userRepo: userRepo,
 	}
@@ -65,6 +66,12 @@ func (s *UserServiceImpl) Register(u *dto.RegisterRequest) *core.AppError {
 		Mobile:   u.Mobile,
 		Password: u.Password,
 		Name:     u.Name,
+		DbBaseModel: core.DbBaseModel{
+			Id:          util.GenerateId(),
+			TenantId:    "1",
+			DataVersion: 1,
+			DataStatus:  1,
+		},
 	}
 
 	_, err := s.userRepo.InsertUser(&user)
