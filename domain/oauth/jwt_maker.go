@@ -3,6 +3,7 @@ package oauth
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	core "github.com/loongkirin/gpaas/core"
@@ -15,11 +16,27 @@ type JWTMaker struct {
 	oauthConfig core.OAuthConfig
 }
 
-func (maker JWTMaker) GenerateToken(mobile string, username string) (string, *OAuthClaims, error) {
-	claims := NewOAuthClaims(mobile, username, maker.oauthCfg.Issuer, maker.oauthCfg.ExpiresTime)
-	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+func (maker JWTMaker) GenerateAccessToken(mobile string, username string) (string, *OAuthClaims, error) {
+	duration, err := time.ParseDuration(maker.oauthConfig.AccessExpiresTime)
+	if err != nil {
+		duration = time.Hour * 8
+	}
 
-	token, err := jwtToken.SignedString([]byte(maker.oauthCfg.SecretKey))
+	claims := NewOAuthClaims(mobile, username, maker.oauthConfig.Issuer, duration)
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := jwtToken.SignedString([]byte(maker.oauthConfig.SecretKey))
+	return token, claims, err
+}
+
+func (maker JWTMaker) GenerateRefreshToken(mobile string, username string) (string, *OAuthClaims, error) {
+	duration, err := time.ParseDuration(maker.oauthConfig.RefreshExpiresTime)
+	if err != nil {
+		duration = time.Hour * 24 * 7
+	}
+
+	claims := NewOAuthClaims(mobile, username, maker.oauthConfig.Issuer, duration)
+	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := jwtToken.SignedString([]byte(maker.oauthConfig.SecretKey))
 	return token, claims, err
 }
 
@@ -29,7 +46,7 @@ func (maker JWTMaker) VerifyToken(token string) (*OAuthClaims, error) {
 		if !ok {
 			return nil, ErrInvalidKey
 		}
-		return []byte(maker.oauthCfg.SecretKey), nil
+		return []byte(maker.oauthConfig.SecretKey), nil
 	}
 
 	jwtToken, err := jwt.ParseWithClaims(token, &OAuthClaims{}, keyFunc)
@@ -44,17 +61,17 @@ func (maker JWTMaker) VerifyToken(token string) (*OAuthClaims, error) {
 
 	claims, ok := jwtToken.Claims.(*OAuthClaims)
 	if !ok {
-		return nil, ErrInvalidToken
+		return nil, ErrTokenInvalid
 	}
 
 	return claims, nil
 }
 
 // NewJWTMaker creates a new JWTMaker.
-func NewJWTMaker(oauthCfg core.OAuthConfig) (Maker, error) {
+func NewJWTMaker(oauthCfg core.OAuthConfig) (OAuthMaker, error) {
 	if len(oauthCfg.SecretKey) < MinSecretKeySize {
 		return nil, fmt.Errorf("invalid key size: must be at least %d characters", MinSecretKeySize)
 	}
 
-	return &JWTMaker{oauthCfg: oauthCfg}, nil
+	return &JWTMaker{oauthConfig: oauthCfg}, nil
 }

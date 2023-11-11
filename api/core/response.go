@@ -15,6 +15,7 @@ type Response struct {
 const (
 	ERROR        = 500
 	UNAUTHORIZED = 401
+	BADREQUEST   = 400
 	SUCCESS      = 200
 )
 
@@ -36,4 +37,8 @@ func Fail(c *gin.Context, msg string, data interface{}) {
 
 func Unauthorized(c *gin.Context, msg string, data interface{}) {
 	Result(c, UNAUTHORIZED, msg, data)
+}
+
+func BadRequest(c *gin.Context, msg string, data interface{}) {
+	Result(c, BADREQUEST, msg, data)
 }

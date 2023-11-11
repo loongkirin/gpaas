@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"fmt"
+	"time"
 
 	core "github.com/loongkirin/gpaas/core"
 	"github.com/o1egl/paseto/v2"
@@ -15,15 +16,31 @@ type PasetoMaker struct {
 	oauthConfig core.OAuthConfig
 }
 
-func (maker PasetoMaker) GenerateToken(mobile string, username string) (string, *OAuthClaims, error) {
-	claims := NewOAuthClaims(mobile, username, maker.oauthCfg.Issuer, maker.oauthCfg.ExpiresTime)
+func (maker PasetoMaker) GenerateAccessToken(mobile string, username string) (string, *OAuthClaims, error) {
+	duration, err := time.ParseDuration(maker.oauthConfig.AccessExpiresTime)
+	if err != nil {
+		duration = time.Hour * 8
+	}
+
+	claims := NewOAuthClaims(mobile, username, maker.oauthConfig.Issuer, duration)
+	token, err := maker.paseto.Encrypt(maker.secretKey, claims, nil)
+	return token, claims, err
+}
+
+func (maker PasetoMaker) GenerateRefreshToken(mobile string, username string) (string, *OAuthClaims, error) {
+	duration, err := time.ParseDuration(maker.oauthConfig.RefreshExpiresTime)
+	if err != nil {
+		duration = time.Hour * 24 * 7
+	}
+
+	claims := NewOAuthClaims(mobile, username, maker.oauthConfig.Issuer, duration)
 	token, err := maker.paseto.Encrypt(maker.secretKey, claims, nil)
 	return token, claims, err
 }
 
 func (maker PasetoMaker) VerifyToken(token string) (*OAuthClaims, error) {
 	claims := &OAuthClaims{}
-	err := maker.paseto.Decrypt(token, p.secretKey, claims, nil)
+	err := maker.paseto.Decrypt(token, maker.secretKey, claims, nil)
 	if err != nil {
 		return nil, ErrTokenInvalid
 	}
@@ -43,9 +60,9 @@ func NewPasetoMaker(oauthCfg core.OAuthConfig) (OAuthMaker, error) {
 	}
 
 	maker := &PasetoMaker{
-		paseto:    paseto.NewV2(),
-		secretKey: []byte(oauthCfg.SecretKey),
-		oauthCfg:  oauthCfg,
+		paseto:      paseto.NewV2(),
+		secretKey:   []byte(oauthCfg.SecretKey),
+		oauthConfig: oauthCfg,
 	}
 
 	return maker, nil

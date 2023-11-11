@@ -12,7 +12,8 @@ dbconfig:
 
 oauthconfig: 
   secret_key: 'loongkirin_gpaas_auth_secret_key'
-  expires_time: 60
+  access_expires_time: '8h'
+  refresh_expires_time: '168h'
   issuer: 'github.com/loongkirin'
 
 redisconfig:

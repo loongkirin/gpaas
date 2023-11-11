@@ -27,6 +27,6 @@ type RegisterRequest struct {
 	Name     string `json:"name"`
 }
 
-type RefreshToken struct {
-	AccessToken string `json:"access_token"`
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
 }
