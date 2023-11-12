@@ -5,6 +5,6 @@ type DbBaseModel struct {
 	TenantId    string `json:"tenant_id" gorm:"size:32"`
 	DataVersion int    `json:"data_version"`
 	DataStatus  int    `json:"data_status"`
-	CreateTime  int64  `json:"create_time" gorm:"autoCreateTime:nano"`
-	UpdateTime  int64  `json:"update_time" gorm:"autoUpdateTime:nano"`
+	CreateTime  int64  `json:"create_time" gorm:"autoCreateTime:milli"`
+	UpdateTime  int64  `json:"update_time" gorm:"autoUpdateTime:milli"`
 }

@@ -1,6 +1,7 @@
 package implement
 
 import (
+	"context"
 	"errors"
 
 	core "github.com/loongkirin/gpaas/core"
@@ -23,13 +24,13 @@ func NewUserRepository(dbContext core.DbContext) repo.UserRepository {
 	return userRepo
 }
 
-func (r *UserRepositoryImpl) FindById(id string) (*model.User, *core.AppError) {
+func (r *UserRepositoryImpl) FindById(ctx context.Context, id string) (*model.User, *core.AppError) {
 	db, appErr := r.getDb()
 	if appErr != nil {
 		return nil, appErr
 	}
 	var user model.User
-	err := db.Where("id = ?", id).First(&user).Error
+	err := db.WithContext(ctx).Where("id = ?", id).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, core.NewNotFoundError("用户名不存在或者密码错误")
@@ -39,13 +40,13 @@ func (r *UserRepositoryImpl) FindById(id string) (*model.User, *core.AppError) {
 	return &user, nil
 }
 
-func (r *UserRepositoryImpl) FindByMobile(mobile string) (*model.User, *core.AppError) {
+func (r *UserRepositoryImpl) FindByMobile(ctx context.Context, mobile string) (*model.User, *core.AppError) {
 	db, appErr := r.getDb()
 	if appErr != nil {
 		return nil, appErr
 	}
 	var user model.User
-	err := db.Where("mobile = ?", mobile).First(&user).Error
+	err := db.WithContext(ctx).Where("mobile = ?", mobile).First(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, core.NewNotFoundError("用户名不存在或者密码错误")
@@ -55,16 +56,16 @@ func (r *UserRepositoryImpl) FindByMobile(mobile string) (*model.User, *core.App
 	return &user, nil
 }
 
-func (r *UserRepositoryImpl) InsertUser(u *model.User) (*model.User, *core.AppError) {
+func (r *UserRepositoryImpl) InsertUser(ctx context.Context, u *model.User) (*model.User, *core.AppError) {
 	db, appErr := r.getDb()
 	if appErr != nil {
 		return nil, appErr
 	}
 	var user model.User
-	err := db.Where("mobile = ?", u.Mobile).First(&user).Error
+	err := db.WithContext(ctx).Where("mobile = ?", u.Mobile).First(&user).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		u.Password = util.BcryptHash(u.Password)
-		err = db.Create(u).Error
+		err = db.WithContext(ctx).Create(u).Error
 		if err != nil {
 			return nil, core.AsAppError(err)
 		}
@@ -73,45 +74,45 @@ func (r *UserRepositoryImpl) InsertUser(u *model.User) (*model.User, *core.AppEr
 	return nil, core.NewUnexpectedError("用户名已注册")
 }
 
-func (r *UserRepositoryImpl) UpdateUser(u *model.User) (*model.User, *core.AppError) {
+func (r *UserRepositoryImpl) UpdateUser(ctx context.Context, u *model.User) (*model.User, *core.AppError) {
 	db, appErr := r.getDb()
 	if appErr != nil {
 		return nil, appErr
 	}
 	var user model.User
-	err := db.Where("mobile = ?", u.Mobile).First(&user).Error
+	err := db.WithContext(ctx).Where("mobile = ?", u.Mobile).First(&user).Error
 	if err != nil {
 		return nil, core.AsAppError(err)
 	}
 	user.Name = u.Name
 	user.DenyLogin = u.DenyLogin
-	err = db.Save(&user).Error
+	err = db.WithContext(ctx).Save(&user).Error
 	if err != nil {
 		return nil, core.AsAppError(err)
 	}
 	return &user, nil
 }
 
-func (r *UserRepositoryImpl) DeleteUserByMobile(mobile string) (bool, *core.AppError) {
+func (r *UserRepositoryImpl) DeleteUserByMobile(ctx context.Context, mobile string) (bool, *core.AppError) {
 	db, appErr := r.getDb()
 	if appErr != nil {
 		return false, appErr
 	}
 	user := model.User{}
-	err := db.Where("mobile = ?", mobile).Delete(&user).Error
+	err := db.WithContext(ctx).Where("mobile = ?", mobile).Delete(&user).Error
 	if err != nil {
 		return false, core.AsAppError(err)
 	}
 	return true, nil
 }
 
-func (r *UserRepositoryImpl) DeleteUserById(id string) (bool, *core.AppError) {
+func (r *UserRepositoryImpl) DeleteUserById(ctx context.Context, id string) (bool, *core.AppError) {
 	db, appErr := r.getDb()
 	if appErr != nil {
 		return false, appErr
 	}
 	user := model.User{}
-	err := db.Delete(&user, id).Error
+	err := db.WithContext(ctx).Delete(&user, id).Error
 	if err != nil {
 		return false, core.AsAppError(err)
 	}

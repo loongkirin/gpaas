@@ -18,8 +18,11 @@ func Run() {
 	// fmt.Println(AppContext.APP_DbContext.GetDb() == nil)
 	// fmt.Println(AppContext.APP_REDIS == nil)
 
-	// migrator.MigrateDb(AppContext.APP_DbContext)
+	// fmt.Println("migrate database start......")
+	// migrator.MigrateDb(app.AppContext.APP_DbContext)
+	// fmt.Println("migrate database end......")
 
+	fmt.Println("migrate database start......")
 	router := initializeRouter()
 	router.Run(":8081")
 }
