@@ -2,6 +2,7 @@ package implement
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -78,7 +79,7 @@ func (s *UserServiceImpl) Login(ctx *gin.Context, u *dto.LoginRequest) (r *dto.L
 		ExpiredAt:    claims.ExpiredAt.UnixMilli(),
 
 		DbBaseModel: core.DbBaseModel{
-			Id:          util.GenerateId(),
+			Id:          claims.Id,
 			TenantId:    "1",
 			DataVersion: 1,
 			DataStatus:  1,
@@ -128,4 +129,77 @@ func (s *UserServiceImpl) Register(ctx *gin.Context, u *dto.RegisterRequest) *co
 
 	_, err := s.userRepo.InsertUser(ctx, &user)
 	return err
+}
+
+func (s *UserServiceImpl) RefreshToken(ctx *gin.Context, u *dto.RefreshTokenRequest) (r *dto.RefreshTokenResponse, err *core.AppError) {
+	claims, oauthErr := s.oauthMaker.VerifyToken(u.RefreshToken)
+	if oauthErr != nil {
+		return nil, core.NewValidationError("Refresh Token is Invalid")
+	}
+
+	session, err := s.sessionRepo.FindById(ctx, claims.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	if session.IsBlocked {
+		return nil, core.NewAuthenticationError("Session Blocked")
+	}
+
+	if session.UserName != claims.UserName {
+		return nil, core.NewAuthenticationError("Incorrect Session User")
+	}
+
+	if session.RefreshToken != u.RefreshToken {
+		return nil, core.NewAuthenticationError("Incorrect Session Refresh Token")
+	}
+
+	expiredAt := time.UnixMilli(session.ExpiredAt)
+	if time.Now().After(expiredAt) {
+		return nil, core.NewAuthenticationError("Session Expired")
+	}
+
+	accessToken, _, oauthErr := s.oauthMaker.GenerateAccessToken(session.Mobile, session.UserName)
+	if oauthErr != nil {
+		return nil, core.NewUnexpectedError("获取access token失败")
+	}
+	refreshToken, claims, oauthErr := s.oauthMaker.GenerateRefreshToken(session.Mobile, session.UserName)
+	if oauthErr != nil {
+		return nil, core.NewUnexpectedError("获取refresh token失败")
+	}
+
+	_, err = s.sessionRepo.DeleteById(ctx, session.Id)
+	if err != nil {
+		return nil, core.NewUnexpectedError("Delete Session Data Failure")
+	}
+
+	session = &model.OAuthSession{
+		UserId:       session.UserId,
+		Mobile:       session.Mobile,
+		UserName:     session.UserName,
+		RefreshToken: refreshToken,
+		UserAgent:    ctx.Request.UserAgent(),
+		ClientIp:     ctx.ClientIP(),
+		IsBlocked:    false,
+		ExpiredAt:    claims.ExpiredAt.UnixMilli(),
+
+		DbBaseModel: core.DbBaseModel{
+			Id:          claims.Id,
+			TenantId:    "1",
+			DataVersion: 1,
+			DataStatus:  1,
+		},
+	}
+
+	_, err = s.sessionRepo.Insert(ctx, session)
+	if err != nil {
+		return nil, core.NewUnexpectedError("Insert Session Data Failure")
+	}
+
+	r = &dto.RefreshTokenResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}
+
+	return r, nil
 }

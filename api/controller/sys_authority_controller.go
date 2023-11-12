@@ -61,31 +61,29 @@ func (t *SystemAuthorityController) Login(c *gin.Context) {
 
 func (t *SystemAuthorityController) Register(c *gin.Context) {
 	var l dto.RegisterRequest
-	_ = c.ShouldBindJSON(&l)
+	if err := c.ShouldBindJSON(&l); err != nil {
+		response.BadRequest(c, "Bad Request:Invalid Parameters", map[string]interface{}{})
+	}
 
 	err := t.userService.Register(c, &l)
 
 	if err != nil {
 		response.Fail(c, err.Message, map[string]interface{}{})
+	} else {
+		response.Ok(c, "注册成功", map[string]interface{}{})
 	}
-
-	response.Ok(c, "注册成功", map[string]interface{}{})
 }
 
 func (t *SystemAuthorityController) RefreshToken(c *gin.Context) {
 	var l dto.RefreshTokenRequest
-	_ = c.ShouldBindJSON(&l)
-
-	token := ""
-
-	// j := util.NewJWTUtil() // 唯一签名
-	// token, err := j.RefreshToken(l.AccessToken)
-	// if err != nil {
-	// 	response.Unauthorized(c, err.Error(), map[string]interface{}{})
-	// 	return
-	// }
-	r := &dto.RefreshTokenRequest{
-		RefreshToken: token,
+	if err := c.ShouldBindJSON(&l); err != nil {
+		response.BadRequest(c, "Bad Request:Invalid Parameters", map[string]interface{}{})
 	}
-	response.Ok(c, "Refresh token success", r)
+
+	r, err := t.userService.RefreshToken(c, &l)
+	if err != nil {
+		response.Fail(c, err.Message, map[string]interface{}{})
+	} else {
+		response.Ok(c, "Refresh token success", r)
+	}
 }

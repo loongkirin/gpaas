@@ -10,4 +10,5 @@ import (
 type UserService interface {
 	Login(ctx *gin.Context, u *dto.LoginRequest) (r *dto.LoginResponse, err *core.AppError)
 	Register(ctx *gin.Context, u *dto.RegisterRequest) *core.AppError
+	RefreshToken(ctx *gin.Context, u *dto.RefreshTokenRequest) (r *dto.RefreshTokenResponse, err *core.AppError)
 }

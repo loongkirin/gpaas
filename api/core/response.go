@@ -8,8 +8,8 @@ import (
 
 type Response struct {
 	Code    int         `json:"code,omitempty"`
-	Data    interface{} `json:"data"`
 	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 const (
@@ -19,12 +19,24 @@ const (
 	SUCCESS      = 200
 )
 
-func Result(c *gin.Context, code int, msg string, data interface{}) {
-	c.JSON(http.StatusOK, Response{
+func NewResponseWithData(code int, msg string, data interface{}) Response {
+	return Response{
 		code,
-		data,
 		msg,
-	})
+		data,
+	}
+}
+
+func NewResponse(code int, msg string) Response {
+	return Response{
+		code,
+		msg,
+		map[string]interface{}{},
+	}
+}
+
+func Result(c *gin.Context, code int, msg string, data interface{}) {
+	c.JSON(http.StatusOK, NewResponseWithData(code, msg, data))
 }
 
 func Ok(c *gin.Context, msg string, data interface{}) {
