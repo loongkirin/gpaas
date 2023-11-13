@@ -18,13 +18,15 @@ import (
 )
 
 type UserServiceImpl struct {
+	tenantRepo  repo.TenantRepository
 	userRepo    repo.UserRepository
 	sessionRepo repo.OAuthSessionRepository
 	oauthMaker  oauth.OAuthMaker
 }
 
 func NewUserService() svc.UserService {
-	userReop := repoImpl.NewUserRepository(app.AppContext.APP_DbContext)
+	tenantRepo := repoImpl.NewTenantRepository(app.AppContext.APP_DbContext)
+	userRepo := repoImpl.NewUserRepository(app.AppContext.APP_DbContext)
 	sessionRepo := repoImpl.NewOAuthSessionRepository(app.AppContext.APP_DbContext)
 	oauthMaker, err := oauth.NewPasetoMaker(app.AppContext.APP_CONFIG.OAuthConfig)
 
@@ -33,7 +35,8 @@ func NewUserService() svc.UserService {
 	}
 
 	userSvc := &UserServiceImpl{
-		userRepo:    userReop,
+		tenantRepo:  tenantRepo,
+		userRepo:    userRepo,
 		sessionRepo: sessionRepo,
 		oauthMaker:  oauthMaker,
 	}
@@ -92,9 +95,9 @@ func (s *UserServiceImpl) Login(ctx *gin.Context, u *dto.LoginRequest) (r *dto.L
 	}
 
 	r = &dto.LoginResponse{
-		Mobile:       user.Mobile,
-		UserId:       user.DbBaseModel.Id,
-		UserName:     user.Name,
+		// Mobile:       user.Mobile,
+		// UserId:       user.DbBaseModel.Id,
+		// UserName:     user.Name,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
@@ -107,27 +110,48 @@ func (s *UserServiceImpl) Register(ctx *gin.Context, u *dto.RegisterRequest) *co
 		return core.NewValidationError("参数错误")
 	}
 
-	if strings.Trim(u.Mobile, " ") == "" {
+	if strings.Trim(u.User.Mobile, " ") == "" {
 		return core.NewValidationError("手机号不能为空")
 	}
 
-	if strings.Trim(u.Password, " ") == "" {
+	if strings.Trim(u.User.Password, " ") == "" {
 		return core.NewValidationError("密码不能为空")
 	}
 
-	user := model.User{
-		Mobile:   u.Mobile,
-		Password: u.Password,
-		Name:     u.Name,
+	tenantId := util.GenerateId()
+	tenant := model.Tenant{
+		Name:     u.Tenant.TenantName,
+		Tel:      u.Tenant.Tel,
+		PostCode: u.Tenant.PostCode,
+		Address:  u.Tenant.Address,
+		Email:    u.Tenant.Email,
+		Status:   "actived",
 		DbBaseModel: core.DbBaseModel{
-			Id:          util.GenerateId(),
+			Id:          tenantId,
 			TenantId:    "1",
 			DataVersion: 1,
 			DataStatus:  1,
 		},
 	}
 
-	_, err := s.userRepo.InsertUser(ctx, &user)
+	_, err := s.tenantRepo.Insert(ctx, &tenant)
+	if err != nil {
+		return err
+	}
+
+	user := model.User{
+		Mobile:   u.User.Mobile,
+		Password: u.User.Password,
+		Name:     u.User.UserName,
+		DbBaseModel: core.DbBaseModel{
+			Id:          util.GenerateId(),
+			TenantId:    tenantId,
+			DataVersion: 1,
+			DataStatus:  1,
+		},
+	}
+
+	_, err = s.userRepo.InsertUser(ctx, &user)
 	return err
 }
 

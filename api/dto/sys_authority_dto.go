@@ -13,18 +13,32 @@ type LoginRequest struct {
 	Captcha   string `json:"captcha"`
 }
 
+type UserDTO struct {
+	UserId   string `json:"user_id"`
+	Mobile   string `json:"mobile"`
+	UserName string `json:"user_name"`
+	Password string `json:"password"`
+}
+
+type TenantDTO struct {
+	TenantId   string `json:"tenant_id"`
+	TenantName string `json:"tenant_name"`
+	Address    string `json:"address"`
+	PostCode   string `json:"post_code"`
+	Tel        string `json:"tel"`
+	Email      string `json:"email"`
+}
+
 type LoginResponse struct {
-	Mobile       string `json:"mobile"`
-	UserId       string `json:"user_id"`
-	UserName     string `json:"user_name"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	Tenant       []TenantDTO `json:"tenants"`
+	User         UserDTO     `json:"user"`
+	AccessToken  string      `json:"access_token"`
+	RefreshToken string      `json:"refresh_token"`
 }
 
 type RegisterRequest struct {
-	Mobile   string `json:"mobile"`
-	Password string `json:"password"`
-	Name     string `json:"name"`
+	Tenant TenantDTO `json:"tenant"`
+	User   UserDTO   `json:"user"`
 }
 
 type RefreshTokenRequest struct {
