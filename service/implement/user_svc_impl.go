@@ -80,13 +80,7 @@ func (s *UserServiceImpl) Login(ctx *gin.Context, u *dto.LoginRequest) (r *dto.L
 		ClientIp:     ctx.ClientIP(),
 		IsBlocked:    false,
 		ExpiredAt:    claims.ExpiredAt.UnixMilli(),
-
-		DbBaseModel: core.DbBaseModel{
-			Id:          claims.Id,
-			TenantId:    "1",
-			DataVersion: 1,
-			DataStatus:  1,
-		},
+		DbBaseModel:  core.NewDbBaseModel("1", claims.Id),
 	}
 
 	_, err = s.sessionRepo.Insert(ctx, &session)
@@ -120,18 +114,13 @@ func (s *UserServiceImpl) Register(ctx *gin.Context, u *dto.RegisterRequest) *co
 
 	tenantId := util.GenerateId()
 	tenant := model.Tenant{
-		Name:     u.Tenant.TenantName,
-		Tel:      u.Tenant.Tel,
-		PostCode: u.Tenant.PostCode,
-		Address:  u.Tenant.Address,
-		Email:    u.Tenant.Email,
-		Status:   "actived",
-		DbBaseModel: core.DbBaseModel{
-			Id:          tenantId,
-			TenantId:    "1",
-			DataVersion: 1,
-			DataStatus:  1,
-		},
+		Name:        u.Tenant.TenantName,
+		Tel:         u.Tenant.Tel,
+		PostCode:    u.Tenant.PostCode,
+		Address:     u.Tenant.Address,
+		Email:       u.Tenant.Email,
+		Status:      "actived",
+		DbBaseModel: core.NewDbBaseModel("1", tenantId),
 	}
 
 	_, err := s.tenantRepo.Insert(ctx, &tenant)
@@ -140,15 +129,10 @@ func (s *UserServiceImpl) Register(ctx *gin.Context, u *dto.RegisterRequest) *co
 	}
 
 	user := model.User{
-		Mobile:   u.User.Mobile,
-		Password: u.User.Password,
-		Name:     u.User.UserName,
-		DbBaseModel: core.DbBaseModel{
-			Id:          util.GenerateId(),
-			TenantId:    tenantId,
-			DataVersion: 1,
-			DataStatus:  1,
-		},
+		Mobile:      u.User.Mobile,
+		Password:    u.User.Password,
+		Name:        u.User.UserName,
+		DbBaseModel: core.NewDbBaseModel(tenantId, util.GenerateId()),
 	}
 
 	_, err = s.userRepo.InsertUser(ctx, &user)
@@ -206,13 +190,7 @@ func (s *UserServiceImpl) RefreshToken(ctx *gin.Context, u *dto.RefreshTokenRequ
 		ClientIp:     ctx.ClientIP(),
 		IsBlocked:    false,
 		ExpiredAt:    claims.ExpiredAt.UnixMilli(),
-
-		DbBaseModel: core.DbBaseModel{
-			Id:          claims.Id,
-			TenantId:    "1",
-			DataVersion: 1,
-			DataStatus:  1,
-		},
+		DbBaseModel:  core.NewDbBaseModel("1", claims.Id),
 	}
 
 	_, err = s.sessionRepo.Insert(ctx, session)
