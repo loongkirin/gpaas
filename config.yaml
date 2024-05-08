@@ -1,0 +1,22 @@
+dbconfig:
+  db_type: 'postgres'
+  host: '127.0.0.1'
+  port: '5432'
+  config: 'sslmode=disable TimeZone=Asia/Shanghai'
+  db_name: 'gpaas_db'
+  user: 'gpaas'
+  password: 'pg@password'
+  max_idle_connections: 10
+  max_open_connections: 100
+  conn_max_lifetime: '10m'
+
+oauthconfig: 
+  secret_key: 'loongkirin_gpaas_auth_secret_key'
+  access_expires_time: '8h'
+  refresh_expires_time: '168h'
+  issuer: 'github.com/loongkirin'
+
+redisconfig:
+  db: 0
+  host: '127.0.0.1:6379'
+  password: ''
