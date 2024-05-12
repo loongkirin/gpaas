@@ -3,8 +3,8 @@ package migrator
 import (
 	"fmt"
 
+	db "github.com/loongkirin/gdk/database/gorm"
 	model "github.com/loongkirin/gpaas/domain/model"
-	db "github.com/loongkirin/gpaas/pkg/database"
 )
 
 func MigrateDb(dbContext db.DbContext) {

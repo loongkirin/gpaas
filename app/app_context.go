@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/loongkirin/gdk/database/gorm"
 	cfg "github.com/loongkirin/gpaas/pkg/config"
-	db "github.com/loongkirin/gpaas/pkg/database"
 	"github.com/redis/go-redis/v9"
 	"github.com/spf13/viper"
 	"golang.org/x/sync/singleflight"
@@ -16,7 +16,7 @@ type appContext struct {
 	APP_CONFIG                 cfg.AppConfig
 	APP_VP                     *viper.Viper
 	APP_REDIS                  *redis.Client
-	APP_DbContext              db.DbContext
+	APP_DbContext              gorm.DbContext
 	APP_Concurrency_Controller *singleflight.Group
 }
 
@@ -74,5 +74,5 @@ func (ctx *appContext) initRedis() {
 }
 
 func (ctx *appContext) initDbContext() {
-	ctx.APP_DbContext = db.CreateDbContext(ctx.APP_CONFIG.DbConfig)
+	ctx.APP_DbContext = gorm.CreateDbContext(ctx.APP_CONFIG.DbConfig)
 }

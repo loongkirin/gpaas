@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	router "github.com/loongkirin/gpaas/api/router"
 	app "github.com/loongkirin/gpaas/app"
 )
 
@@ -35,9 +36,9 @@ func initializeRouter() *gin.Engine {
 			c.JSON(http.StatusOK, "ok")
 		})
 	}
-	// v1Group := Router.Group("v1")
-	// ginRouterEntry := router.Entry{}
-	// ginRouterEntry.InitAllRouter(v1Group)
+	v1Group := Router.Group("v1")
+	ginRouterEntry := router.Entry{}
+	ginRouterEntry.InitAllRouter(v1Group)
 
 	return Router
 }
